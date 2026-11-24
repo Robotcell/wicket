@@ -66,11 +66,9 @@ class ResumableUploadResource implements IResource
 	/** The content type of the chunks. */
 	static final String CHUNK_TYPE = "application/offset+octet-stream";
 
-	/** The header of the name a whole file was stored under. */
-	static final String FILE_NAME_HEADER = "Wicket-Upload-File-Name";
+	static final String FILE_NAME_HEADER = ResumableUploadResourceReference.FILE_NAME_HEADER;
 
-	/** The header of the resource key of the error of a refusal. */
-	static final String ERROR_HEADER = "Wicket-Upload-Error";
+	static final String ERROR_HEADER = ResumableUploadResourceReference.ERROR_HEADER;
 
 	/** How long a request waits for another one writing the same upload. */
 	static final Duration LOCK_WAIT = Duration.ofSeconds(3);

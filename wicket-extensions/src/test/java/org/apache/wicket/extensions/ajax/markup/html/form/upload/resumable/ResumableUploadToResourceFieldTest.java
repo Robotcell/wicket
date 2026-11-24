@@ -348,6 +348,19 @@ class ResumableUploadToResourceFieldTest extends WicketTestCase
 	}
 
 	@Test
+	void takesTheFilesOfAClientOfItsOwn()
+	{
+		query = reference().newQuery("an-app", Bytes.bytes(30), null, -1);
+		assertEquals(413, send("POST", PATH, Map.of("Upload-Length", "31"), null));
+		String url = create(30, "a.txt");
+		assertEquals(204, patch(url, 0, bytes(30, 0)));
+		String fileName = header(ResumableUploadResourceReference.FILE_NAME_HEADER);
+		assertTrue(reference().getFileManager().getFile("an-app", fileName).isFile());
+		assertThrows(IllegalArgumentException.class,
+			() -> reference().newQuery("", Bytes.bytes(1), null, -1));
+	}
+
+	@Test
 	void refusesRequestsWithoutAValidGrant()
 	{
 		tester.getRequest().setMethod("POST");

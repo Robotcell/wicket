@@ -16,6 +16,7 @@
  */
 package org.apache.wicket.extensions.ajax.markup.html.form.upload.resumable;
 
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
@@ -77,6 +78,25 @@ record UploadGrant(String uploadFieldId, long maxSize, long fileMaxSize, long fi
 			.getCryptFactory()
 			.newCrypt()
 			.encryptUrlSafe(serialized());
+	}
+
+	/**
+	 * @return the query of the grant, as the script of
+	 *         {@link org.apache.wicket.markup.html.form.upload.resource.FileUploadToResourceField}
+	 *         writes it
+	 */
+	String query()
+	{
+		return AbstractFileUploadResource.UPLOAD_ID + '=' + encoded(uploadFieldId) + '&' +
+			AbstractFileUploadResource.MAX_SIZE + '=' + maxSize + '&' +
+			AbstractFileUploadResource.FILE_MAX_SIZE + '=' + fileMaxSize + '&' +
+			AbstractFileUploadResource.FILE_COUNT_MAX + '=' + fileCountMax + '&' +
+			AbstractFileUploadResource.UPLOAD_TOKEN + '=' + encoded(token());
+	}
+
+	private static String encoded(String value)
+	{
+		return URLEncoder.encode(value, StandardCharsets.UTF_8);
 	}
 
 	private String serialized()

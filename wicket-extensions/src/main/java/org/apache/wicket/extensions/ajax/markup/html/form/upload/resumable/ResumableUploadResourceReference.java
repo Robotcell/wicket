@@ -108,6 +108,15 @@ public class ResumableUploadResourceReference extends ResourceReference
 	/** The name the reference is registered under. */
 	public static final String NAME = "resumable-uploads";
 
+	/**
+	 * The header of the answer that completes an upload, and of a {@code HEAD} after it: the name
+	 * the file manager stored the file under.
+	 */
+	public static final String FILE_NAME_HEADER = "Wicket-Upload-File-Name";
+
+	/** The header of a refusal: the resource key of its error. */
+	public static final String ERROR_HEADER = "Wicket-Upload-Error";
+
 	/** The size of a file at most, by default. */
 	public static final Bytes DEFAULT_MAX_FILE_SIZE = Bytes.gigabytes(1);
 
@@ -232,6 +241,38 @@ public class ResumableUploadResourceReference extends ResourceReference
 	public IResource getResource()
 	{
 		return new ResumableUploadResource(this);
+	}
+
+	/**
+	 * Creates the query that a client other than {@link ResumableUploadToResourceField}, a React
+	 * application or a mobile app for example, adds to the URL of each of its requests: the id its
+	 * files are stored under and their limits, signed with the
+	 * {@link org.apache.wicket.settings.SecuritySettings#getCryptFactory() crypt} of the
+	 * application, so the client cannot change them. Once a file is whole, the answer tells the
+	 * name it was stored under in the header {@value #FILE_NAME_HEADER}, which the client hands
+	 * back to the application, for it to find the file with
+	 * {@code getFileManager().getFile(uploadFieldId, name)}.
+	 * <p>
+	 * The id has to be unique in the application and must not come from the browser. The name the
+	 * client hands back does: the application has to check that the id is one it gave the
+	 * client's session.
+	 *
+	 * @param uploadFieldId
+	 *            the id the files are stored under
+	 * @param maxSize
+	 *            the size of the files sent at once, and of each file, at most
+	 * @param fileMaxSize
+	 *            the size of each file at most, {@code null} for {@code maxSize}
+	 * @param fileCountMax
+	 *            the number of files sent at once at most, -1 for any
+	 * @return the query, without its {@code ?}
+	 */
+	public String newQuery(String uploadFieldId, Bytes maxSize, Bytes fileMaxSize,
+		long fileCountMax)
+	{
+		Args.notEmpty(uploadFieldId, "uploadFieldId");
+		Args.notNull(maxSize, "maxSize");
+		return UploadGrant.of(uploadFieldId, maxSize, fileMaxSize, fileCountMax).query();
 	}
 
 	/**
